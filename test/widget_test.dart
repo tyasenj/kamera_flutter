@@ -1,30 +1,28 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:camera/camera.dart';
+import 'package:kamera_flutter/widget/takepicture_screen.dart';
 import 'package:kamera_flutter/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('Camera app smoke test', (WidgetTester tester) async {
+    // Inisialisasi kamera
+    final cameras = await availableCameras();
+    final firstCamera = cameras.isNotEmpty ? cameras.first : null;
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Bangun widget MaterialApp dengan halaman TakePictureScreen atau Center jika kamera tidak tersedia
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        debugShowCheckedModeBanner: false,
+        home: firstCamera != null
+            ? TakePictureScreen(camera: firstCamera)
+            : const Center(child: Text("No camera available")),
+      ),
+    );
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Lakukan pengujian sederhana
+    expect(find.text("No camera available"), findsNothing);
+    expect(find.byType(TakePictureScreen), findsOneWidget);
   });
 }
